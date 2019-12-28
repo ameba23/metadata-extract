@@ -1,10 +1,10 @@
 const pull = require('pull-stream')
 const path = require('path')
 const fileType = require('file-type')
+const assert = require('assert')
 
 const extractorsPath = './extractors/'
-const defaultExtractors = ['music-metadata'] // TODO put this somewhere else
-const defaultExtractorFns = defaultExtractors.map(filename => require(extractorsPath + filename))
+const defaultExtractors = ['music-metadata']
 
 module.exports = function extract (data, opts = {}, callback) {
   if (typeof opts === 'function' && !callback) {
@@ -13,11 +13,17 @@ module.exports = function extract (data, opts = {}, callback) {
   }
 
   const log = opts.log || console.log
-  const extractors = opts.extractors || defaultExtractorFns
+  const extractorNames = opts.extractors || defaultExtractors
+  assert(Array.isArray(extractorNames), 'opts.extractors must be an array')
+
+  const extractors = extractorNames.map((e) => {
+    if (typeof e === 'string') return require(extractorsPath + e)
+    assert(typeof e === 'function', 'opts.extractors must contain strings or functions')
+  })
+
   const metadata = { mimeType: getMimeType(data) }
   if (opts.filename) metadata.extension = path.extname(opts.filename)
-
-  console.log(metadata.mimeType)
+  log('mimetype: ', metadata.mimeType)
 
   pull(
     pull.values(extractors),
@@ -64,4 +70,3 @@ function getMimeType (data) {
     ? ft.mime
     : undefined
 }
-
