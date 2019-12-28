@@ -4,7 +4,7 @@
   "description": "Extract metadata from media files, with pluggable add-ons.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tape test/**/*.test.js | tap-spec"
   },
   "keywords": [
     "metadata"
@@ -18,5 +18,9 @@
     "music-metadata": "^5.4.1",
     "pdf2json": "^1.1.8",
     "pull-stream": "^3.6.14"
+  },
+  "devDependencies": {
+    "tap-spec": "^5.0.0",
+    "tape": "^4.12.1"
   }
 }

@@ -32,8 +32,8 @@ module.exports = function extract (data, opts = {}, callback) {
         extractor(data, metadata, cb)
       } catch (err) {
         log('Error from extractor: ', extractor.name, err)
-        cb(null, data)
-      } // ignore errors and keep going
+        cb(null, data) // ignore errors and keep going
+      }
     }),
     // pull.filter(Boolean),
     pull.filter(t => !!t),
@@ -50,11 +50,22 @@ module.exports = function extract (data, opts = {}, callback) {
     if (metadata && typeof metadata === 'object') {
       Object.keys(metadata).forEach((key) => {
         const value = metadata[key]
-        if (typeof value === 'object') return sanitise(value)
+        if (!value) {
+          delete metadata[key]
+          return
+        }
+        if (typeof value === 'object') {
+          if (isEmptyObject(value) || isEmptyArray(value)) {
+            delete metadata[key]
+          } else {
+            metadata[key] = sanitise(value)
+            if (isEmptyObject(metadata[key]) || isEmptyArray(metadata[key])) delete metadata[key]
+          }
+        }
         // Dont allow buffers
         if (Buffer.isBuffer(value) && !opts.allowBuffers) delete metadata[key]
       })
-    } else { log('WARNING - returned metadata is badly formed: ', metadata) } // TODO
+    }
     return metadata
   }
 }
@@ -69,4 +80,12 @@ function getMimeType (data) {
   return ft
     ? ft.mime
     : undefined
+}
+
+function isEmptyObject (thing) {
+  return (Object.keys(thing).length === 0 && thing.constructor === Object)
+}
+
+function isEmptyArray (thing) {
+  return (Array.isArray(thing) && !thing.length)
 }

@@ -13,11 +13,24 @@ module.exports = function (data, input, callback) {
     if (!['mp3', 'flac'].includes(input.extension)) return callback()
   }
   mm.parseBuffer(data, mimeType, { skipCovers: true })
-    .then((metadata) => {
-      // console.log(util.inspect(metadata, { showHidden: false, depth: null }));
+    .then((output) => {
+      const metadata = output.common
+      metadata.comment = uniq(metadata.comment)
+      metadata.artists = uniq(metadata.artists)
+      if ((metadata.artists.length === 1) && (metadata.artists[0] === metadata.artist)) delete metadata.artists
+      metadata.genre = uniq(metadata.genre)
+      if ((metadata.genre.length === 1) && (metadata.genre[0] === 'Other')) delete metadata.genre
+      if (output.format) {
+        ['bitrate', 'lossless', 'sampleRate', 'codec', 'duration'].forEach((property) => {
+          metadata[property] = output.format[property]
+        })
+      }
       callback(null, { 'music-metadata': metadata })
-    }).catch((err) => {
-      console.log(err)
-      callback()
-    })
+    }).catch(callback)
+}
+
+function uniq (array) {
+  return Array.isArray(array)
+    ? Array.from(new Set(array))
+    : array
 }
