@@ -22,5 +22,9 @@
   "devDependencies": {
     "tap-spec": "^5.0.0",
     "tape": "^4.12.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ameba23/metadata-extract.git"
   }
 }

@@ -17,9 +17,9 @@ module.exports = function (data, input, callback) {
       const metadata = output.common
       metadata.comment = uniq(metadata.comment)
       metadata.artists = uniq(metadata.artists)
-      if ((metadata.artists.length === 1) && (metadata.artists[0] === metadata.artist)) delete metadata.artists
+      if (metadata.artists && (metadata.artists.length === 1) && (metadata.artists[0] === metadata.artist)) delete metadata.artists
       metadata.genre = uniq(metadata.genre)
-      if ((metadata.genre.length === 1) && (metadata.genre[0] === 'Other')) delete metadata.genre
+      if (metadata.genre && (metadata.genre.length === 1) && (metadata.genre[0] === 'Other')) delete metadata.genre
       if (output.format) {
         ['bitrate', 'lossless', 'sampleRate', 'codec', 'duration'].forEach((property) => {
           metadata[property] = output.format[property]
