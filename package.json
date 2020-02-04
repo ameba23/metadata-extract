@@ -15,6 +15,7 @@
     "exiftool": "^0.0.3",
     "file-type": "^12.4.2",
     "image-size": "^0.8.3",
+    "mime": "^2.4.4",
     "music-metadata": "^5.4.1",
     "pdf2json": "^1.1.8",
     "pull-stream": "^3.6.14"
