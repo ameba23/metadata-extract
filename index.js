@@ -1,6 +1,7 @@
 const pull = require('pull-stream')
 const path = require('path')
 const fileType = require('file-type')
+const mime = require('mime') // or mime/lite is only 2kb
 const assert = require('assert')
 
 const extractorsPath = './extractors/'
@@ -12,7 +13,8 @@ module.exports = function extract (data, opts = {}, callback) {
     opts = {}
   }
 
-  const log = opts.log || console.log
+  const metadata = {}
+  const log = opts.log || console.log  // TODO should use debug
   const extractorNames = opts.extractors || defaultExtractors
   assert(Array.isArray(extractorNames), 'opts.extractors must be an array')
 
@@ -21,8 +23,8 @@ module.exports = function extract (data, opts = {}, callback) {
     assert(typeof e === 'function', 'opts.extractors must contain strings or functions')
   })
 
-  const metadata = { mimeType: getMimeType(data) }
   if (opts.filename) metadata.extension = path.extname(opts.filename)
+  metadata.mimeType = getMimeType(data, metadata.extension)
   log('mimetype: ', metadata.mimeType)
 
   pull(
@@ -70,16 +72,18 @@ module.exports = function extract (data, opts = {}, callback) {
   }
 }
 
-function getMimeType (data) {
+function getMimeType (data, extension) {
   // TODO: file-type can also take a stream
   let ft
   if (data.length >= fileType.minimumBytes) {
     ft = fileType(data)
   }
-  // TODO if ft undefined, get ft from extension
+
+  // if we cannot determine mime type from data,
+  // use the extension. (this is less reliable)
   return ft
     ? ft.mime
-    : undefined
+    : extension ? mime.getType(extension) : undefined
 }
 
 function isEmptyObject (thing) {
