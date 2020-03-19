@@ -26,7 +26,8 @@ module.exports = function extract (dataStream, opts = {}, callback) {
 
   if (opts.filename) metadata.extension = path.extname(opts.filename)
   // metadata.mimeType = getMimeType(dataStream, metadata.extension)
-  getMimeType(dataStream, metadata.extension, (err, mimeType) => {
+  //
+  getMimeType(dataStream, metadata.extension, (err, mimeType, dataStream1) => {
     if (err) mimeType = undefined
     metadata.mimeType = mimeType
 
@@ -36,7 +37,7 @@ module.exports = function extract (dataStream, opts = {}, callback) {
       pull.values(extractors),
       pull.asyncMap((extractor, cb) => {
         try {
-          extractor(dataStream, metadata, cb)
+          extractor(dataStream1, metadata, cb)
         } catch (err) {
           log('Error from extractor: ', extractor.name, err)
           cb(null, {}) // ignore errors and keep going
@@ -86,7 +87,7 @@ function getMimeType (dataStream, extension, callback) {
     const fileType = fileTypeObject.fileType
       ? fileTypeObject.fileType.mime
       : extension ? mime.getType(extension) : undefined
-    callback(null, fileType)
+    callback(null, fileType, fileTypeObject)
   }).catch(callback)
 }
 
