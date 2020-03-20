@@ -4,7 +4,7 @@ const mm = require('music-metadata')
 
 // TODO: can add 'duration:true' but calculating it is expensive (whole file must be parsed)
 // skipCovers: true stops covers being extracted
-module.exports = function (dataStream, inputMetadata, callback) {
+module.exports = function (filename, inputMetadata, callback) {
   const mimeType = inputMetadata.mimeType
   if (mimeType) {
     console.log(mimeType)
@@ -15,7 +15,7 @@ module.exports = function (dataStream, inputMetadata, callback) {
     // TODO mimetype from extension
     if (!['mp3', 'flac'].includes(inputMetadata.extension)) return callback()
   }
-  mm.parseStream(dataStream, mimeType, { skipCovers: true })
+  mm.parseFile(filename, { skipCovers: true })
     .then((output) => {
       const metadata = output.common
       metadata.comment = uniq(metadata.comment)

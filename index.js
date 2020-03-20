@@ -5,10 +5,9 @@ const mime = require('mime') // or mime/lite is only 2kb
 const assert = require('assert')
 
 const extractorsPath = './extractors/'
-const defaultExtractors = ['music-metadata']
-// const defaultExtractors = ['music-metadata', 'text']
+const defaultExtractors = ['music-metadata', 'text', 'pdf-text', 'image-size']
 
-module.exports = function extract (dataStream, opts = {}, callback) {
+module.exports = function extract (filename, opts = {}, callback) {
   if (typeof opts === 'function' && !callback) {
     callback = opts
     opts = {}
@@ -24,10 +23,11 @@ module.exports = function extract (dataStream, opts = {}, callback) {
     assert(typeof e === 'function', 'opts.extractors must contain strings or functions')
   })
 
-  if (opts.filename) metadata.extension = path.extname(opts.filename)
+  // if (opts.filename) metadata.extension = path.extname(opts.filename)
+  metadata.extension = path.extname(filename)
   // metadata.mimeType = getMimeType(dataStream, metadata.extension)
   //
-  getMimeType(dataStream, metadata.extension, (err, mimeType, dataStream1) => {
+  getMimeType(filename, metadata.extension, (err, mimeType) => {
     if (err) mimeType = undefined
     metadata.mimeType = mimeType
 
@@ -37,7 +37,7 @@ module.exports = function extract (dataStream, opts = {}, callback) {
       pull.values(extractors),
       pull.asyncMap((extractor, cb) => {
         try {
-          extractor(dataStream1, metadata, cb)
+          extractor(filename, metadata, cb)
         } catch (err) {
           log('Error from extractor: ', extractor.name, err)
           cb(null, {}) // ignore errors and keep going
@@ -79,15 +79,15 @@ module.exports = function extract (dataStream, opts = {}, callback) {
   })
 }
 
-function getMimeType (dataStream, extension, callback) {
-  // TODO: file-type can also take a stream
-  fileType.stream(dataStream).then((fileTypeObject) => {
+function getMimeType (filename, extension, callback) {
+  fileType.fromFile(filename).then((fileTypeObject) => {
     // if we cannot determine mime type from data,
     // use the extension. (this is less reliable)
-    const fileType = fileTypeObject.fileType
-      ? fileTypeObject.fileType.mime
+    console.log(fileTypeObject)
+    const fileType = fileTypeObject
+      ? fileTypeObject.mime
       : extension ? mime.getType(extension) : undefined
-    callback(null, fileType, fileTypeObject)
+    callback(null, fileType)
   }).catch(callback)
 }
 

@@ -1,10 +1,14 @@
 const exif = require('exiftool')
+const fs = require('fs')
 const { keysWeWant } = require('./exif-keys.json')
 
-module.exports = function (data, metadata, callback) {
-  exif.metadata(data, (err, metadata) => {
+module.exports = function (filename, metadata, callback) {
+  fs.readFile(filename, (err, data) => {
     if (err) return callback(err)
-    callback(null, reduceMetadata(metadata))
+    exif.metadata(data, (err, metadata) => {
+      if (err) return callback(err)
+      callback(null, reduceMetadata(metadata))
+    })
   })
 }
 // TODO binary option -b extracts 'picture' or 'thumbnail'

@@ -11,8 +11,8 @@ test('index a directory', t => {
     pull(
       pull.values(files),
       pull.asyncMap((file, cb) => {
-        const dataStream = fs.createReadStream(path.join(assets, file))
-        extract(dataStream, { filename: file }, (err, metadata) => {
+        const filename = path.join(assets, file)
+        extract(filename, (err, metadata) => {
           console.log(metadata)
           t.error(err, `No error on extracting from ${file}`)
           cb(null, metadata)
