@@ -11,13 +11,11 @@ test('index a directory', t => {
     pull(
       pull.values(files),
       pull.asyncMap((file, cb) => {
-        fs.readFile(path.join(assets, file), (err, data) => {
-          t.error(err, 'No error on reading file')
-          extract(data, { filename: file }, (err, metadata) => {
-            console.log(metadata)
-            t.error(err, `No error on extracting from ${file}`)
-            cb(null, metadata)
-          })
+        const filename = path.join(assets, file)
+        extract(filename, (err, metadata) => {
+          console.log(metadata)
+          t.error(err, `No error on extracting from ${file}`)
+          cb(null, metadata)
         })
       }),
       pull.collect((err) => {

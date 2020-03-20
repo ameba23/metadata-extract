@@ -1,24 +1,32 @@
 const readline = require('readline')
+const fs = require('fs')
 const MAXBYTES = 1024
 
-module.exports = function (data, input, callback) {
-  const mimeType = input.mimeType
-  if (mimeType) {
-    if (mimeType.split('/')[0] !== 'text') return callback()
-  }
+module.exports = function (filename, inputMetadata, callback) {
+  const mimeType = inputMetadata.mimeType
+  if (!mimeType) return callback()
+  if ((mimeType.split('/')[0] !== 'text') && (mimeType !== 'audio/x-mpegurl')) return callback()
+
   let previewText = ''
-  const rl = readline.createInterface({
-    input: data // stream
-  })
+  let closed = false
+  const input = fs.createReadStream(filename)
+  const rl = readline.createInterface({ input })
+  // logEvents(rl)
   rl.on('line', (line) => {
     previewText += `${line}\n`
-    if (Buffer.from(previewText).length > MAXBYTES) {
-      // TODO destroy stream
-      callback(null, { previewText })
+    if (Buffer.from(previewText).length >= MAXBYTES) {
+      done()
     }
   })
-  rl.on('end', () => { // 'close' ?
+
+  rl.on('close', () => {
     if (previewText === '') previewText = undefined
-    callback(null, { previewText })
+    done()
   })
+
+  function done () {
+    input.destroy()
+    if (!closed) callback(null, { previewText })
+    closed = true
+  }
 }
