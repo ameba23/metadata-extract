@@ -4,6 +4,7 @@ const MAXBYTES = 1024
 
 module.exports = function (filename, inputMetadata, callback) {
   const mimeType = inputMetadata.mimeType
+  // TODO allow extensions: .url, .txt, .nfo, .md
   if (!mimeType) return callback()
   if ((mimeType.split('/')[0] !== 'text') && (mimeType !== 'audio/x-mpegurl')) return callback()
 
