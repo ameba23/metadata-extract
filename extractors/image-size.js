@@ -1,6 +1,6 @@
 const sizeOf = require('image-size')
 
-// extract image size
+// Extract image size
 // there is no point in using this as well as exiftool, as it does the
 // same thing. but this is pure js (no external deps)
 

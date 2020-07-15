@@ -12,15 +12,16 @@
   "author": "peg",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@gxl/epub-parser": "^2.0.2",
+    "epub": "^1.2.1",
     "exiftool": "^0.0.3",
     "file-type": "^14.1.4",
     "image-size": "^0.8.3",
     "mime": "^2.4.4",
     "mobi": "^0.0.1",
     "music-metadata": "^6.3.6",
-    "pdf2json": "^1.1.8",
-    "pull-stream": "^3.6.14"
+    "pdf-parse": "^1.1.1",
+    "pull-stream": "^3.6.14",
+    "yauzl": "^2.10.0"
   },
   "devDependencies": {
     "tap-spec": "^5.0.0",

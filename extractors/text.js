@@ -1,12 +1,13 @@
 const readline = require('readline')
 const fs = require('fs')
 const MAXBYTES = 1024
+const treatAsText = ['audio/x-mpegurl', 'application/json']
 
 module.exports = function (filename, inputMetadata, callback) {
   const mimeType = inputMetadata.mimeType
   // TODO allow extensions: .url, .txt, .nfo, .md
   if (!mimeType) return callback()
-  if ((mimeType.split('/')[0] !== 'text') && (mimeType !== 'audio/x-mpegurl')) return callback()
+  if ((mimeType.split('/')[0] !== 'text') && (!treatAsText.includes(mimeType))) return callback()
 
   let previewText = ''
   let closed = false

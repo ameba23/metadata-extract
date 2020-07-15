@@ -5,7 +5,7 @@ const mime = require('mime') // or mime/lite is only 2kb
 const assert = require('assert')
 
 const extractorsPath = './extractors/'
-const defaultExtractors = ['music-metadata', 'text', 'pdf-text', 'image-size']
+const defaultExtractors = ['music-metadata', 'text', 'pdf-text', 'image-size', 'zip', 'epub']
 
 module.exports = function extract (filename, opts = {}, callback) {
   if (typeof opts === 'function' && !callback) {
@@ -83,7 +83,7 @@ function getMimeType (filename, extension, callback) {
   fileType.fromFile(filename).then((fileTypeObject) => {
     // if we cannot determine mime type from data,
     // use the extension. (this is less reliable)
-    console.log(fileTypeObject)
+    // console.log(fileTypeObject)
     const fileType = fileTypeObject
       ? fileTypeObject.mime
       : extension ? mime.getType(extension) : undefined

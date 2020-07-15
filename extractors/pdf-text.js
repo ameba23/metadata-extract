@@ -1,26 +1,20 @@
-const PDFParser = require('pdf2json')
+const pdf = require('pdf-parse')
 const fs = require('fs')
 const MAXDATA = 2000 // character length of preview
+const MAXPAGES = 3 // Max pages to parse
 
 // Extract text from pdfs
 
 module.exports = function (filename, { mimeType }, callback) {
   if (mimeType !== 'application/pdf') return callback()
-  const inputStream = fs.createReadStream(filename)
-
-  // would be better to use a stream and not parse the whole file - pdf2json can do this.
-  const pdfParser = new PDFParser(this, 1)
-  inputStream.pipe(pdfParser)
-
-  pdfParser.on('pdfParser_dataError', errData => {
-    return callback(errData.parserError)
-  })
-
-  pdfParser.on('pdfParser_dataReady', pdfData => {
-    const fullText = pdfParser.getRawTextContent()
-    const pdfText = (fullText.length > MAXDATA)
-      ? fullText.slice(0, MAXDATA)
-      : fullText
-    callback(null, { pdfText })
+  fs.readFile(filename, (err, pdfBuffer) => {
+    if (err) return callback(err)
+    pdf(pdfBuffer, { max: MAXPAGES }).then((data) => {
+      delete data.metadata
+      delete data.version
+      delete data.numrender
+      data.text = data.text.slice(0, MAXDATA)
+      callback(null, data)
+    }).catch(console.log)
   })
 }
