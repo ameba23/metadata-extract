@@ -15,6 +15,8 @@ module.exports = function (filename, { mimeType }, callback) {
       delete data.numrender
       data.text = data.text.slice(0, MAXDATA)
       callback(null, data)
-    }).catch(console.log)
+    }).catch((err) => {
+      return callback(err)
+    })
   })
 }

@@ -7,8 +7,7 @@ const mm = require('music-metadata')
 module.exports = function (filename, inputMetadata, callback) {
   const mimeType = inputMetadata.mimeType
   if (mimeType) {
-    console.log(mimeType)
-    if (mimeType.split('/')[0] !== 'audio') return callback()
+    if (!['audio', 'video'].includes(mimeType.split('/')[0])) return callback()
     // TODO handle m3u
     if (mimeType === 'audio/x-mpegurl') return callback()
   } else {

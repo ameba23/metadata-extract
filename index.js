@@ -14,7 +14,7 @@ module.exports = function extract (filename, opts = {}, callback) {
   }
 
   const metadata = {}
-  const log = opts.log || console.log  // TODO should use debug
+  const log = opts.log || console.log // TODO should use debug
   const extractorNames = opts.extractors || defaultExtractors
   assert(Array.isArray(extractorNames), 'opts.extractors must be an array')
 
