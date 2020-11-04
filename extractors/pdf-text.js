@@ -4,6 +4,7 @@ const MAXDATA = 2000 // character length of preview
 const MAXPAGES = 3 // Max pages to parse
 
 // Extract text from pdfs
+// see also https://www.npmjs.com/package/pdf-text-reader
 
 module.exports = function (filename, { mimeType }, callback) {
   if (mimeType !== 'application/pdf') return callback()
