@@ -1,6 +1,6 @@
 {
   "name": "metadata-extract",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Extract metadata from media files, with pluggable add-ons.",
   "main": "index.js",
   "scripts": {
