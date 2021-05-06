@@ -1,0 +1,5 @@
+test/test-media/*.epub
+test/test-media/*.zip
+test/test-media/*.pdf
+test/test-media/*.mp4
+
