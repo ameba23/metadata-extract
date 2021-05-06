@@ -1,12 +1,14 @@
 const EPub = require('epub')
 
-module.exports = function (filename, { mimeType }, callback) {
-  if (mimeType !== 'application/epub+zip') return callback()
-  const epub = new EPub(filename)
-  epub.on('end', () => {
-    epub.metadata.toc = epub.toc.map(e => e.title)
-    callback(null, epub.metadata)
+module.exports = async function (filename, { mimeType }) {
+  if (mimeType !== 'application/epub+zip') return
+  return new Promise((resolve, reject) => {
+    const epub = new EPub(filename)
+    epub.on('end', () => {
+      epub.metadata.toc = epub.toc.map(e => e.title)
+      resolve(epub.metadata)
+    })
+    epub.on('error', reject)
+    epub.parse()
   })
-  epub.on('error', callback)
-  epub.parse()
 }

@@ -1,24 +1,32 @@
 const yauzl = require('yauzl')
 
-module.exports = function (filename, inputMetadata, callback) {
+module.exports = async function (filename, inputMetadata) {
   const mimeType = inputMetadata.mimeType
-  if (mimeType !== 'application/zip') return callback()
+  if (mimeType !== 'application/zip') return
 
-  const files = {}
-  yauzl.open(filename, { lazyEntries: true }, (err, zipfile) => {
-    if (err) return callback(err)
-    zipfile.readEntry()
-    zipfile.on('entry', (entry) => {
-      if (!/\/$/.test(entry.fileName)) {
-        files[entry.fileName] = {
-          size: entry.uncompressedSize
-          // comment? fileComment?
-        }
-      }
+  const files = new Promise((resolve, reject) => {
+    yauzl.open(filename, { lazyEntries: true }, (err, zipfile) => {
+      if (err) return reject(err)
+
+      const files = {}
       zipfile.readEntry()
-    })
-    zipfile.on('end', () => {
-      callback(null, { files })
+      zipfile.on('entry', (entry) => {
+        if (!/\/$/.test(entry.fileName)) {
+          files[entry.fileName] = {
+            size: entry.uncompressedSize
+            // comment? fileComment?
+          }
+        }
+        zipfile.readEntry()
+      })
+      zipfile.on('error', (err) => {
+        reject(err)
+      })
+      zipfile.on('end', () => {
+        resolve({ files })
+      })
     })
   })
+
+  return files
 }
