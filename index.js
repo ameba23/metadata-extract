@@ -28,16 +28,8 @@ module.exports = async function extract (filename, opts = {}) {
   log('Mimetype: ', metadata.mimeType)
 
   for (const extractor of extractors) {
-    const output = await new Promise((resolve, reject) => {
-      try {
-        extractor(filename, metadata, (err, output) => {
-          if (err) return reject(err)
-          resolve(output)
-        })
-      } catch (err) {
-        log('Error from extractor: ', extractor.name, err)
-        resolve()
-      }
+    const output = await extractor(filename, metadata).catch((err) => {
+      log('Error from extractor: ', extractor.name, err)
     })
     if (!output) continue
     Object.assign(metadata, sanitise(output))

@@ -11,7 +11,6 @@ test('index a directory', async t => {
       resolve(files)
     })
   })
-  console.log(files)
   for (const file of files) {
     const filename = path.join(assets, file)
     const metadata = await extract(filename)
