@@ -1,20 +1,15 @@
-const pull = require('pull-stream')
 const path = require('path')
 const fileType = require('file-type')
 const mime = require('mime') // or mime/lite is only 2kb
 const assert = require('assert')
+const debug = require('debug')
 
 const extractorsPath = './extractors/'
 const defaultExtractors = ['music-metadata', 'text', 'pdf-text', 'image-size', 'zip', 'epub']
 
-module.exports = function extract (filename, opts = {}, callback) {
-  if (typeof opts === 'function' && !callback) {
-    callback = opts
-    opts = {}
-  }
-
+module.exports = async function extract (filename, opts = {}) {
   const metadata = {}
-  const log = opts.log || console.log // TODO should use debug
+  const log = opts.log || debug('metadata-extract')
   const extractorNames = opts.extractors || defaultExtractors
   assert(Array.isArray(extractorNames), 'opts.extractors must be an array')
 
@@ -27,68 +22,62 @@ module.exports = function extract (filename, opts = {}, callback) {
   metadata.extension = path.extname(filename)
   // metadata.mimeType = getMimeType(dataStream, metadata.extension)
   //
-  getMimeType(filename, metadata.extension, (err, mimeType) => {
-    if (err) mimeType = undefined
-    metadata.mimeType = mimeType
+  const mimeType = await getMimeType(filename, metadata.extension).catch(() => {})
+  metadata.mimeType = mimeType
 
-    log('mimetype: ', metadata.mimeType)
+  log('Mimetype: ', metadata.mimeType)
 
-    pull(
-      pull.values(extractors),
-      pull.asyncMap((extractor, cb) => {
-        try {
-          extractor(filename, metadata, cb)
-        } catch (err) {
-          log('Error from extractor: ', extractor.name, err)
-          cb(null, {}) // ignore errors and keep going
-        }
-      }),
-      // pull.filter(Boolean),
-      pull.filter(t => !!t),
-      pull.map(sanitise),
-      // should this be a reducer?
-      pull.collect((err, metadatas) => {
-        if (err) return callback(err) // TODO: or ingore?
-        Object.assign(metadata, ...metadatas)
-        callback(null, metadata)
-      })
-    )
-
-    function sanitise (metadata) {
-      if (metadata && typeof metadata === 'object') {
-        Object.keys(metadata).forEach((key) => {
-          const value = metadata[key]
-          if (!value) {
-            delete metadata[key]
-            return
-          }
-          if (typeof value === 'object') {
-            if (isEmptyObject(value) || isEmptyArray(value)) {
-              delete metadata[key]
-            } else {
-              metadata[key] = sanitise(value)
-              if (isEmptyObject(metadata[key]) || isEmptyArray(metadata[key])) delete metadata[key]
-            }
-          }
-          // Dont allow buffers
-          if (Buffer.isBuffer(value) && !opts.allowBuffers) delete metadata[key]
+  for (const extractor of extractors) {
+    const output = await new Promise((resolve, reject) => {
+      try {
+        extractor(filename, metadata, (err, output) => {
+          if (err) return reject(err)
+          resolve(output)
         })
+      } catch (err) {
+        log('Error from extractor: ', extractor.name, err)
+        resolve()
       }
-      return metadata
+    })
+    if (!output) continue
+    Object.assign(metadata, sanitise(output))
+  }
+
+  return metadata
+
+  function sanitise (metadata) {
+    if (metadata && typeof metadata === 'object') {
+      Object.keys(metadata).forEach((key) => {
+        const value = metadata[key]
+        if (!value) {
+          delete metadata[key]
+          return
+        }
+        if (typeof value === 'object') {
+          if (isEmptyObject(value) || isEmptyArray(value)) {
+            delete metadata[key]
+          } else {
+            metadata[key] = sanitise(value)
+            if (isEmptyObject(metadata[key]) || isEmptyArray(metadata[key])) delete metadata[key]
+          }
+        }
+        // Dont allow buffers
+        if (Buffer.isBuffer(value) && !opts.allowBuffers) delete metadata[key]
+      })
     }
-  })
+    return metadata
+  }
 }
 
-function getMimeType (filename, extension, callback) {
-  fileType.fromFile(filename).then((fileTypeObject) => {
-    // if we cannot determine mime type from data,
-    // use the extension. (this is less reliable)
-    // console.log(fileTypeObject)
-    const fileType = fileTypeObject
-      ? fileTypeObject.mime
-      : extension ? mime.getType(extension) : undefined
-    callback(null, fileType)
-  }).catch(callback)
+async function getMimeType (filename, extension) {
+  const fileTypeObject = await fileType.fromFile(filename)
+  // if we cannot determine mime type from data,
+  // use the extension. (this is less reliable)
+  // console.log(fileTypeObject)
+  const type = fileTypeObject
+    ? fileTypeObject.mime
+    : extension ? mime.getType(extension) : undefined
+  return type
 }
 
 function isEmptyObject (thing) {
