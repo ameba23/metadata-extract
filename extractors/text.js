@@ -13,7 +13,6 @@ module.exports = function (filename, inputMetadata, callback) {
   let closed = false
   const input = fs.createReadStream(filename)
   const rl = readline.createInterface({ input })
-  // logEvents(rl)
   rl.on('line', (line) => {
     previewText += `${line}\n`
     if (Buffer.from(previewText).length >= MAXBYTES) {
