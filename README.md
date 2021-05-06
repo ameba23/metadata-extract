@@ -1,9 +1,11 @@
 # metadata-extract
 
+Extract metadata from various types of media file using 'pluggable' extractors.
+
 ## API
 ```js
 const extract = require('metadata-extract')
-extract(source, options, callback)
+const metadata = await extract(sourceFilename, options)
 ```
 
 `options` is an optional object which may include:
@@ -19,7 +21,7 @@ extract(source, options, callback)
   - `options.log` - A logger function (defaults to console.log)
   - `options.allowBuffers` - If true, buffers will be allowed in 
 
-`callback` is a function which takes `(error, metadata)`, where metadata is an object containing the metadata found.
+`metadata` is an object containing the metadata found.
 
 ## Included extractors
 
