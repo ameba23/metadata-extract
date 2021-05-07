@@ -21,7 +21,6 @@
     "mobi": "^0.0.1",
     "music-metadata": "^6.3.6",
     "pdf-parse": "^1.1.1",
-    "pull-stream": "^3.6.14",
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
